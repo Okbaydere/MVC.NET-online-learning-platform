@@ -1,4 +1,3 @@
-Here is a draft GitHub README for your e-commerce learning project with Identity and ASP.NET MVC:
 
 # E-Commerce Learning Project
 
