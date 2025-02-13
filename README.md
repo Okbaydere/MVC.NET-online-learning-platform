@@ -32,6 +32,3 @@ The default credentials to access the admin portal are:
 
 **Password:** Password.1234
 
-
-
-Overall this project gave great exposure to common patterns and practices in building e-commerce sites with ASP.NET MVC. There are many opportunities to continue adding features and enhancing the application.
