@@ -82,10 +82,16 @@
 
 @section Scripts{
     <script>
-        tinymce.init({
-            selector: 'textarea',
-            plugins: 'anchor autolink charmap codesample emoticons  lists   table visualblocks wordcount',
-            toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough |  align lineheight | numlist bullist indent outdent',
+        CKEDITOR.replace('Product_Detail', {
+            height: 300,
+            toolbar: [
+                ['Bold', 'Italic', 'Underline', 'Strike'],
+                ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent'],
+                ['JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock'],
+                ['Link', 'Unlink'],
+                ['Undo', 'Redo'],
+                ['Source', 'Maximize']
+            ]
         });
     </script>
     @{

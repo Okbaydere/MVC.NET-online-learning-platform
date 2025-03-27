@@ -4,21 +4,59 @@
     ViewBag.Title = "Grade Assignment";
 }
 
-<h2>Grade Assignment for @Model.User.UserName</h2>
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">Grade Assignment for @Model.User.UserName</h3>
+                </div>
+                <div class="card-body">
+                    <form method="post" asp-controller="Students" asp-action="GradeAssignment">
+                        <input type="hidden" asp-for="Id" />
+                        <input type="hidden" asp-for="AssignmentId" />
+                        <input type="hidden" asp-for="UserId" />
+                        
+                        <div class="form-group mb-3">
+                            <label class="form-label fw-bold">Assignment</label>
+                            <input type="text" value="@Model.Assignment.Name" readonly class="form-control" />
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label class="form-label fw-bold">Submission Date</label>
+                            <input type="text" value="@(Model.SubmissionDate?.ToString("g") ?? "Not submitted")" readonly class="form-control" />
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label class="form-label fw-bold">Student Answer</label>
+                            <div class="border p-3 rounded bg-light">
+                                @Html.Raw(Model.UserAnswer)
+                            </div>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label asp-for="Score" class="form-label fw-bold">Score (0-100)</label>
+                            <input type="number" asp-for="Score" min="0" max="100" class="form-control" required />
+                            <span asp-validation-for="Score" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label asp-for="Feedback" class="form-label fw-bold">Feedback</label>
+                            <textarea asp-for="Feedback" class="form-control" rows="4" placeholder="Provide constructive feedback to the student..."></textarea>
+                            <span asp-validation-for="Feedback" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="form-group d-flex justify-content-between">
+                            <a asp-action="Index" asp-route-productId="@Model.Assignment.ProductID" class="btn btn-secondary">Back to Students</a>
+                            <button type="submit" class="btn btn-primary">Submit Grade</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-<form method="post" action="@Url.Action("GradeAssignment")">
-    <input type="hidden" asp-for="Id" />
-    <div class="form-group">
-        <label asp-for="Assignment.Name">Assignment Name</label>
-        <input type="text" asp-for="Assignment.Name" readonly class="form-control" />
-    </div>
-    <div class="form-group">
-        <label asp-for="SubmissionDate">Submission Date</label>
-        <input type="text" asp-for="SubmissionDate" readonly class="form-control" />
-    </div>
-    <div class="form-group">
-        <label asp-for="Score">Score</label>
-        <input type="number" asp-for="Score" class="form-control" />
-    </div>
-    <button type="submit" class="btn btn-primary">Submit Grade</button>
-</form>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

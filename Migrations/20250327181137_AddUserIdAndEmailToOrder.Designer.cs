@@ -4,6 +4,7 @@ using JustLearn1.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace JustLearn1.Migrations
 {
     [DbContext(typeof(JustDbContext))]
-    partial class JustDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250327181137_AddUserIdAndEmailToOrder")]
+    partial class AddUserIdAndEmailToOrder
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

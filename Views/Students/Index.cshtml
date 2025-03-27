@@ -1,29 +1,62 @@
 ﻿@model IEnumerable<StudentViewModel>
 
 @{
-    ViewBag.Title = "Students";
+    ViewBag.Title = $"Students - {ViewBag.CourseName}";
 }
-<br/>
-<br/>
-<br/>
-<br />
 
-<h2>Your Students</h2>
-
-<table class="table">
-    <thead>
-        <tr>
-            <th>Username</th>
-            <th>Process (%)</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var student in Model)
-        {
-            <tr>
-                <td>@student.UserName</td>
-                <td>@student.Process.ToString("0.00")</td>
-            </tr>
-        }
-    </tbody>
-</table>
+<div class="container mt-5 pt-5">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h2 class="mb-0">Students for @ViewBag.CourseName</h2>
+            <a asp-controller="Products" asp-action="MyProducts" class="btn btn-light">Back to My Courses</a>
+        </div>
+        <div class="card-body">
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Username</th>
+                                <th>Email</th>
+                                <th>Progress</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var student in Model)
+                            {
+                                <tr>
+                                    <td>@student.UserName</td>
+                                    <td>@student.UserName</td>
+                                    <td>
+                                        <div class="progress" style="height: 20px;">
+                                            <div class="progress-bar" role="progressbar" style="width: @student.Process%;"
+                                                 aria-valuenow="@student.Process" aria-valuemin="0" aria-valuemax="100">
+                                                @student.Process.ToString("0.00")%
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <a asp-action="StudentAssignments" asp-route-userId="@student.UserId" asp-route-productId="@Context.Request.Query["productId"]" 
+                                               class="btn btn-sm btn-primary">
+                                                <i class="bi bi-list-check"></i> View Assignments
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info">
+                    <p class="mb-0">No students have purchased this course yet.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>

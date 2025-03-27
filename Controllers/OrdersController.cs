@@ -26,59 +26,84 @@ namespace JustLearn1.Controllers
             _context = context;
         }
 
-        public IActionResult CheckOut()
+        public async Task<IActionResult> CheckOut()
         {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+            {
+                return Challenge();
+            }
+            
             return View();
         }
 
         [HttpPost]
         public async Task<IActionResult> CheckOut(Order order)
         {
-                var user = await _userManager.GetUserAsync(User);
-                if (user != null)
-                {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+            {
+                return Challenge();
+            }
+            
+            if (ModelState.IsValid)
+            {
+                order.UserId = currentUser.Id;
+                order.Email = currentUser.Email;
 
-                    _orderRepository.PlaceOrder(order);
-                    _shoppingCartRepository.ClearCart();
-                    HttpContext.Session.SetInt32("CartCount", 0);
-
-                    return RedirectToAction("CheckoutComplete");
-                }
-                else
-                {
-                    // Eğer kullanıcı null dönerse, bu bir hata durumudur ve uygun bir hata mesajı gösterilebilir.
-                    ModelState.AddModelError(string.Empty, "An error occurred while getting user information.");
-                }
-
-            // Eğer ModelState geçerli değilse veya kullanıcı bilgisi alınamazsa, sipariş sayfasına geri dönülür.
-            return View(order);
+                _orderRepository.PlaceOrder(order);
+                _shoppingCartRepository.ClearCart();
+                HttpContext.Session.SetInt32("CartCount", 0);
+                
+                TempData["success"] = "Your order has been placed successfully!";
+                return RedirectToAction("CheckoutComplete");
+            }
+            else
+            {
+                // Eğer ModelState geçerli değilse sipariş sayfasına geri dönülür.
+                return View(order);
+            }
         }
 
         public IActionResult CheckoutComplete()
         {
             return View();
         }
+        
+        [Authorize(Roles = "Instructor,Admin")]
         public async Task<IActionResult> ViewOrders(int productId)
         {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+            {
+                return NotFound("User not found");
+            }
+
+            // Ürünün bu eğitmene ait olup olmadığını kontrol et
+            var product = await _context.Products
+                                       .FirstOrDefaultAsync(p => p.Id == productId);
+
+            if (product == null)
+            {
+                return NotFound("Course not found");
+            }
+
+            // Admin değilse ve ürün bu kullanıcıya ait değilse, erişimi reddet
+            if (!await _userManager.IsInRoleAsync(currentUser, "Admin") && 
+                product.UserId != currentUser.Id)
+            {
+                return Forbid();
+            }
+
             var orderDetails = await _context.OrderDetails
                                              .Where(od => od.ProductId == productId)
                                              .Include(od => od.User) // User bilgilerini de getir.
                                              .ToListAsync();
 
-            var product = await _context.Products
-                                        .FirstOrDefaultAsync(p => p.Id == productId);
-
-            if (product == null)
-            {
-                return NotFound();
-            }
-
             ViewBag.ProductName = product.Name;
+            ViewBag.ProductId = productId;
 
             return View(orderDetails);
         }
-
-
-
     }
 }

@@ -27,8 +27,15 @@ namespace JustLearn1Web.Areas.Admin.Controllers
         {
             return View();
         }
-        public IActionResult Shop()
+        [Authorize]
+        public async Task<IActionResult> Shop()
         {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+            {
+                return Challenge();
+            }
+
             List<Product> objProductsList = _unitOfWork.Product.GetAll(includeProperties: "Category").ToList();
 
             return View(objProductsList);
@@ -36,11 +43,6 @@ namespace JustLearn1Web.Areas.Admin.Controllers
 
         public IActionResult Upsert(int? id)
         {
-
-
-            var model = new ProductsVM();
-
-
             ProductsVM ProductsVM = new()
             {
                 CategoryList = _unitOfWork.Category.GetAll().Select(u => new SelectListItem
@@ -60,12 +62,17 @@ namespace JustLearn1Web.Areas.Admin.Controllers
             {
                 //update
                 ProductsVM.Product = _unitOfWork.Product.Get(u => u.Id == id);
+                if (ProductsVM.Product == null)
+                {
+                    return NotFound();
+                }
                 ProductsVM.IsTrending = ProductsVM.Product.IsTrendingProduct;
                 return View(ProductsVM);
             }
 
         }
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> Upsert(ProductsVM ProductsVM, IFormFile? file)
         {
             if (ModelState.IsValid)
@@ -90,6 +97,11 @@ namespace JustLearn1Web.Areas.Admin.Controllers
                     string fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
                     string ProductsPath = Path.Combine(wwwRootPath, @"images\Products");
 
+                    if (!Directory.Exists(ProductsPath))
+                    {
+                        Directory.CreateDirectory(ProductsPath);
+                    }
+
                     if (!string.IsNullOrEmpty(ProductsVM.Product.ImageUrl))
                     {
                         //delete the old image
@@ -113,15 +125,17 @@ namespace JustLearn1Web.Areas.Admin.Controllers
                 if (ProductsVM.Product.Id == 0)
                 {
                     _unitOfWork.Product.Add(ProductsVM.Product);
+                    TempData["success"] = "Course created successfully";
                 }
                 else
                 {
                     _unitOfWork.Product.Update(ProductsVM.Product);
+                    TempData["success"] = "Course updated successfully";
                 }
 
                 _unitOfWork.Save();
-                TempData["success"] = "Products created successfully";
-                return RedirectToAction("Shop");
+                
+                return RedirectToAction("MyProducts");
             }
             else
             {
@@ -154,8 +168,9 @@ namespace JustLearn1Web.Areas.Admin.Controllers
                 return NotFound("User not found");
             }
 
-            List<Product> objProductsList = _unitOfWork.Product.GetAll(includeProperties: "Category").ToList();
-
+            List<Product> objProductsList = _unitOfWork.Product.GetAll(
+                filter: p => p.UserId == currentUser.Id,
+                includeProperties: "Category").ToList();
 
             return View(objProductsList);
         }
@@ -172,7 +187,8 @@ namespace JustLearn1Web.Areas.Admin.Controllers
 
 
         [HttpPost]
-        public IActionResult Delete(int? id)
+        [Authorize(Roles = "Instructor,Admin")]
+        public async Task<IActionResult> Delete(int? id)
         {
             var productToBeDeleted = _unitOfWork.Product.Get(u => u.Id == id);
             if (productToBeDeleted == null)
@@ -180,7 +196,18 @@ namespace JustLearn1Web.Areas.Admin.Controllers
                 return RedirectToAction("MyProducts");
             }
 
-            // ImageUrl null veya boş olup olmadığını kontrol et
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+            {
+                return NotFound("User not found");
+            }
+
+            if (!await _userManager.IsInRoleAsync(currentUser, "Admin") && 
+                productToBeDeleted.UserId != currentUser.Id)
+            {
+                return Forbid();
+            }
+
             if (!string.IsNullOrEmpty(productToBeDeleted.ImageUrl))
             {
                 var oldImagePath =
@@ -195,23 +222,36 @@ namespace JustLearn1Web.Areas.Admin.Controllers
             _unitOfWork.Product.Remove(productToBeDeleted);
             _unitOfWork.Save();
 
+            TempData["success"] = "Course deleted successfully";
             return RedirectToAction("MyProducts");
         }
 
         [HttpDelete]
-        public IActionResult Delete(int id)
+        [Authorize(Roles = "Instructor,Admin")]
+        public async Task<IActionResult> Delete(int id)
         {
             var productToBeDeleted = _unitOfWork.Product.Get(u => u.Id == id);
             if (productToBeDeleted == null)
             {
                 return Json(new { success = false, message = "Error while deleting" });
             }
+
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+            {
+                return Json(new { success = false, message = "User not found" });
+            }
+
+            if (!await _userManager.IsInRoleAsync(currentUser, "Admin") && 
+                productToBeDeleted.UserId != currentUser.Id)
+            {
+                return Json(new { success = false, message = "Not authorized to delete this product" });
+            }
+
             _unitOfWork.Product.Remove(productToBeDeleted);
             _unitOfWork.Save();
             return Json(new { success = true, message = "Delete Successful" });
         }
-
-
 
         #endregion
     }

@@ -1,0 +1,132 @@
+@model IEnumerable<UserAssignment>
+
+@{
+    ViewData["Title"] = "My Assignments";
+}
+
+<div class="container mt-5 pt-5">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h2 class="mb-0">My Assignments</h2>
+            <a asp-action="Index" class="btn btn-light">
+                <i class="bi bi-arrow-left"></i> Back to My Courses
+            </a>
+        </div>
+        <div class="card-body">
+            @if (Model.Any())
+            {
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="card text-center bg-info text-white">
+                            <div class="card-body">
+                                <h3>@Model.Count()</h3>
+                                <p class="mb-0">Total Assignments</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-center bg-success text-white">
+                            <div class="card-body">
+                                <h3>@Model.Count(ua => ua.IsSubmitted)</h3>
+                                <p class="mb-0">Submitted</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-center bg-warning text-white">
+                            <div class="card-body">
+                                <h3>@Model.Count(ua => ua.IsSubmitted && ua.IsGraded)</h3>
+                                <p class="mb-0">Graded</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-center bg-primary text-white">
+                            <div class="card-body">
+                                <h3>@(Model.Where(ua => ua.IsGraded).Average(ua => ua.Score) ?? 0.0)/100</h3>
+                                <p class="mb-0">Average Score</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Course</th>
+                                <th>Assignment</th>
+                                <th>Due Date</th>
+                                <th>Status</th>
+                                <th>Submission Date</th>
+                                <th>Grade</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var assignment in Model)
+                            {
+                                <tr>
+                                    <td>@assignment.Assignment.Product.Name</td>
+                                    <td>@assignment.Assignment.Name</td>
+                                    <td>@assignment.Assignment.DueDate.ToString("MMM d, yyyy")</td>
+                                    <td>
+                                        @if (assignment.IsSubmitted)
+                                        {
+                                            <span class="badge bg-success">Submitted</span>
+                                        }
+                                        else
+                                        {
+                                            if (DateTime.Now > assignment.Assignment.DueDate)
+                                            {
+                                                <span class="badge bg-danger">Overdue</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-warning">Pending</span>
+                                            }
+                                        }
+                                    </td>
+                                    <td>@(assignment.SubmissionDate?.ToString("g") ?? "Not submitted")</td>
+                                    <td>
+                                        @if (assignment.IsGraded)
+                                        {
+                                            <span class="badge bg-primary">@assignment.Score / 100</span>
+                                        }
+                                        else if (assignment.IsSubmitted)
+                                        {
+                                            <span class="badge bg-info">Pending Review</span>
+                                        }
+                                        else
+                                        {
+                                            <span>-</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <a asp-action="StartAssignment" asp-route-assignmentId="@assignment.AssignmentId" class="btn btn-sm btn-primary">
+                                            @if (assignment.IsSubmitted)
+                                            {
+                                                <i class="bi bi-eye"></i> <span>View</span>
+                                            }
+                                            else
+                                            {
+                                                <i class="bi bi-pencil-square"></i> <span>Start</span>
+                                            }
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info text-center">
+                    <h4 class="alert-heading">No Assignments Yet</h4>
+                    <p>You don't have any assignments to complete at this time.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div> 

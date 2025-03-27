@@ -4,6 +4,7 @@ using JustLearn1.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace JustLearn1.Migrations
 {
     [DbContext(typeof(JustDbContext))]
-    partial class JustDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250327180200_AddUserAssignmentFeedbackAndGradedFields")]
+    partial class AddUserAssignmentFeedbackAndGradedFields
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -138,9 +141,6 @@ namespace JustLearn1.Migrations
                     b.Property<int>("CreditNumber")
                         .HasColumnType("int");
 
-                    b.Property<string>("Email")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int>("ExpirationDate")
                         .HasColumnType("int");
 
@@ -156,12 +156,7 @@ namespace JustLearn1.Migrations
                     b.Property<string>("Phone")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("Orders");
                 });
@@ -539,15 +534,6 @@ namespace JustLearn1.Migrations
                         .IsRequired();
 
                     b.Navigation("Assignment");
-                });
-
-            modelBuilder.Entity("JustLearn1.Models.Order", b =>
-                {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("JustLearn1.Models.OrderDetail", b =>

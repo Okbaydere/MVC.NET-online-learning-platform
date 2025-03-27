@@ -1,17 +1,18 @@
-﻿<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
 
 @model Assignment
 
 @{
-    ViewData["Title"] = "Create Assignment";
+    ViewData["Title"] = "Edit Assignment";
     var today = DateTime.Now.ToString("yyyy-MM-dd");
-    var oneWeekLater = DateTime.Now.AddDays(7).ToString("yyyy-MM-dd");
 }
 
 <div class="container mt-5">
     <h1>@ViewData["Title"]</h1>
 
-    <form asp-controller="Assignment" asp-action="Create" asp-route-productId="@Model.ProductID" method="post">
+    <form asp-controller="Assignment" asp-action="Edit" method="post">
+        <input type="hidden" asp-for="AssignmentID" />
+        <input type="hidden" asp-for="ProductID" />
 
         <div class="form-group">
             <label asp-for="Name"></label>
@@ -27,14 +28,30 @@
 
         <div class="form-group">
             <label asp-for="DueDate">Due Date</label>
-            <input asp-for="DueDate" type="date" class="form-control" min="@today" value="@oneWeekLater">
+            <input asp-for="DueDate" type="date" class="form-control" min="@today">
             <span asp-validation-for="DueDate" class="text-danger"></span>
         </div>
 
-        <button type="submit" class="btn btn-primary">Create</button>
-        <a asp-controller="Products" asp-action="MyProducts" class="btn btn-secondary">Cancel</a>
-
+        <button type="submit" class="btn btn-primary">Update</button>
+        <a asp-controller="Assignment" asp-action="ListAssignmentsForProduct" asp-route-productId="@Model.ProductID" class="btn btn-secondary">Back to List</a>
     </form>
+
+    <div class="mt-4">
+        <h3>Upload Assignment Files</h3>
+        <form asp-controller="Assignment" asp-action="UploadAssignmentFile" method="post" enctype="multipart/form-data">
+            <input type="hidden" name="assignmentId" value="@Model.AssignmentID" />
+            
+            <div class="form-group">
+                <label for="file">Select File</label>
+                <input type="file" name="file" id="file" class="form-control-file" required>
+                <small class="form-text text-muted">
+                    Allowed extensions: .pdf, .doc, .docx, .xls, .xlsx, .ppt, .pptx, .txt (Max 10MB)
+                </small>
+            </div>
+            
+            <button type="submit" class="btn btn-info">Upload File</button>
+        </form>
+    </div>
 
 </div>
 
@@ -59,4 +76,4 @@
     @{
         <partial name="_ValidationScriptsPartial" />
     }
-}
+} 

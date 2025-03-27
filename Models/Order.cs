@@ -15,6 +15,11 @@ namespace JustLearn1.Models
         public string? Address { get; set; }
         public decimal OrderTotal { get; set; }
         public DateTime OrderPlaced { get; set; }
+        public string? UserId { get; set; }
+        public string? Email { get; set; }
         public List<OrderDetail>? OrderDetails { get; set; }
+        
+        [ForeignKey("UserId")]
+        public IdentityUser? User { get; set; }
     }
 }

@@ -1,0 +1,93 @@
+@model IEnumerable<UserAssignment>
+
+@{
+    ViewBag.Title = $"Assignments for {ViewBag.StudentName}";
+}
+
+<div class="container mt-5 pt-5">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h2 class="mb-0">Assignments for @ViewBag.StudentName - @ViewBag.CourseName</h2>
+            <a asp-action="Index" asp-route-productId="@Context.Request.Query["productId"]" class="btn btn-light">Back to Students</a>
+        </div>
+        <div class="card-body">
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Assignment</th>
+                                <th>Due Date</th>
+                                <th>Status</th>
+                                <th>Submission Date</th>
+                                <th>Score</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var assignment in Model)
+                            {
+                                <tr>
+                                    <td>@assignment.Assignment.Name</td>
+                                    <td>@assignment.Assignment.DueDate.ToString("d")</td>
+                                    <td>
+                                        @if (assignment.IsSubmitted)
+                                        {
+                                            <span class="badge bg-success">Submitted</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-warning">Not Submitted</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @(assignment.SubmissionDate?.ToString("g") ?? "N/A")
+                                    </td>
+                                    <td>
+                                        @if (assignment.IsGraded)
+                                        {
+                                            <span>@assignment.Score / 100</span>
+                                        }
+                                        else if (assignment.IsSubmitted)
+                                        {
+                                            <span class="badge bg-info">Pending Grade</span>
+                                        }
+                                        else
+                                        {
+                                            <span>N/A</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (assignment.IsSubmitted && !assignment.IsGraded)
+                                        {
+                                            <a asp-action="GradeAssignment" asp-route-assignmentId="@assignment.Id" class="btn btn-sm btn-primary">
+                                                <i class="bi bi-pencil-square"></i> Grade
+                                            </a>
+                                        }
+                                        else if (assignment.IsGraded)
+                                        {
+                                            <a asp-action="GradeAssignment" asp-route-assignmentId="@assignment.Id" class="btn btn-sm btn-secondary">
+                                                <i class="bi bi-eye"></i> View/Edit Grade
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">No submission</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info">
+                    <p class="mb-0">No assignments found for this course.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div> 

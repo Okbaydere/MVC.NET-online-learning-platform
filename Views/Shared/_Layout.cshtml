@@ -1,7 +1,7 @@
 ﻿@inject IHttpContextAccessor HttpContextAccessor
 @{
-  var cartCount = HttpContextAccessor?.HttpContext?.Session.GetInt32("CartCount") ?? 0;
-  var isAdmin = User.IsInRole("Admin");
+    var cartCount = HttpContextAccessor?.HttpContext?.Session.GetInt32("CartCount") ?? 0;
+    var isAdmin = User.IsInRole("Admin");
     var isIns = User.IsInRole("Instructor");
     var isUser = User.IsInRole("User");
 
@@ -63,15 +63,28 @@
                     {
                         <li><a asp-controller="Users" asp-action="Index">Admin Dashboard</a></li>
                     }
-                    @if (isIns){
-                    <li><a asp-controller="Products" asp-action="MyProducts">Instructor Dashboard</a></li>
+                    @if (isIns)
+                    {
+                        <li><a asp-controller="Products" asp-action="MyProducts">Instructor Dashboard</a></li>
+                        <li><a asp-controller="MyCourses" asp-action="Index">My Courses</a></li>
                     }
                     @if (isUser)
                     {
                         <li><a asp-controller="MyCourses" asp-action="Index">My Courses</a></li>
                     }
-                    <li><a asp-controller="Products" asp-action="Shop">Courses</a></li>                   
+                    <li><a asp-controller="Products" asp-action="Shop">Courses</a></li>
                     <partial name="_LoginPartial"></partial>
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <li class="nav-item">
+                            <span class="nav-link" style="background-color: #f0ad4e; border-radius: 5px; padding: 5px 10px; color: white;">
+                                @if (isAdmin) { <text>Admin</text> }
+                                else if (isIns) { <text>Instructor</text> }
+                                else if (isUser) { <text>User</text> }
+                                else { <text>No Role</text> }
+                            </span>
+                        </li>
+                    }
                     <li class="nav-item">
                         <a class="nav-link link text-white show display-4" asp-controller="ShoppingCart" asp-action="Index" style="background-color: #28a745; border-radius: 5px; padding: 10px;">
                             <span><i class="bi bi-cart3 fs-3"></i><small>(@cartCount)</small></span>
@@ -91,7 +104,7 @@
 
         <div class="footer-top">
             <div class="container">
-                <div class="row">                 
+                <div class="row">
                     <div class="col-lg-2 col-md-6 footer-links">
                         <h4>Useful Links</h4>
                         <ul>
@@ -138,7 +151,7 @@
     <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.tiny.cloud/1/g28lhnxtlihu4l4a381gw7tz47voznshwbi10lmsvlekrfme/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
-    
+
     <script src="~/vendor/purecounter/purecounter_vanilla.js"></script>
     <script src="~/vendor/aos/aos.js"></script>
     <script src="~/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
